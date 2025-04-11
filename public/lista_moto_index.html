@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Lista de Precios MOTO</title>
+
+  <!-- Bootstrap & Select2 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Tipografía -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="IMG/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="IMG/favicon.svg" />
+  <link rel="shortcut icon" href="IMG/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="IMG/apple-touch-icon.png" />
+  <link rel="manifest" href="IMG/site.webmanifest" />
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <a class="navbar-brand" href="index.html">
+      <img src="IMG/logo corven neumaticos.png" alt="Logo Corven" height="30" class="d-inline-block align-middle">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse"
+      data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon">☰</span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <!-- Forzamos la ruta para que redirija al subíndice -->
+        <li class="nav-item">
+          <a class="nav-link" href="sublistas_pcr.html">Lista PCR</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="lista_agro_index.html">Lista AGR</a></li>
+        <li class="nav-item"><a class="nav-link" href="lista_tbr_index.html">Lista TBR</a></li>
+        <li class="nav-item"><a class="nav-link" href="lista_moto_index.html">Lista MTR</a></li>
+      </ul>
+    </div>
+  </nav>  
+
+  <!-- CONTENIDO -->
+  <div class="container mt-5 pt-5">
+    <h1 class="text-center mb-4">Consulta de Lista de Precios MOTO</h1>
+    <form id="filterForm">
+      <div class="form-row justify-content-center" id="filters-container">
+        <!-- Dropdowns dinámicos se generarán aquí -->
+      </div>
+      <div class="form-row justify-content-center mt-3">
+        <button type="button" class="btn btn-primary mx-2" id="btnConsultar">Consultar</button>
+        <button type="button" class="btn btn-secondary mx-2" onclick="window.location.href='index.html'">Volver</button>
+      </div>
+    </form>
+
+    <div id="table-container" class="table-scroll d-none mt-4"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer-custom d-flex justify-content-between align-items-center px-4 py-3 mt-5">
+    <p class="mb-0 text-secondary">&copy; 2025 Corven Neumáticos. Todos los derechos reservados.</p>
+    <img src="IMG/logos_grupo-corven_para_fondo_blanco.png" alt="Logo Corven" class="footer-logo">
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script>
+    let jsonData = [];
+    const jsonPath = "Nuevo_Lista_de_Precios_Moto.json";
+    let displayColumns = [];
+    let jsonKeyMapping = {};
+
+    // Definición de filtros (por ejemplo, "Código producto", "Medida" y "Diseño")
+    const filterColumns = [
+      { id: "filtroProducto", key: "Código producto" },
+      { id: "filtroMedida", key: "Medida" },
+      { id: "filtroDiseno", key: "Diseño" }
+    ];
+
+    // Formatea el número a moneda sin decimales y con el símbolo $
+    function formatCurrency(value) {
+      const num = parseFloat(value);
+      return isNaN(num) ? value : "$" + Math.round(num).toLocaleString("es-ES");
+    }
+
+    // Genera los dropdowns dinámicamente según los filtros
+    function generateFilters() {
+      const container = document.getElementById("filters-container");
+      container.innerHTML = "";
+      filterColumns.forEach(({ key, id }) => {
+        const colDiv = document.createElement("div");
+        colDiv.className = "form-group col-md-3";
+
+        const label = document.createElement("label");
+        label.setAttribute("for", id);
+        label.textContent = key;
+
+        const select = document.createElement("select");
+        select.className = "form-control";
+        select.id = id;
+        select.innerHTML = '<option value="">Todos</option>';
+
+        const values = new Set();
+        jsonData.forEach(item => {
+          if (item[key] !== undefined && item[key] !== null) {
+            values.add(String(item[key]).trim());
+          }
+        });
+
+        Array.from(values).sort().forEach(val => {
+          const option = document.createElement("option");
+          option.value = val;
+          option.textContent = val;
+          select.appendChild(option);
+        });
+
+        colDiv.appendChild(label);
+        colDiv.appendChild(select);
+        container.appendChild(colDiv);
+      });
+      $("select").select2({ placeholder: "Seleccione...", allowClear: true });
+    }
+
+    function loadJSONData() {
+      fetch(jsonPath)
+        .then(response => response.json())
+        .then(data => {
+          // Limpiar espacios en blanco de las claves
+          jsonData = data.map(record => {
+            const cleaned = {};
+            Object.keys(record).forEach(key => {
+              cleaned[key.trim()] = record[key];
+            });
+            return cleaned;
+          });
+
+          if (jsonData.length > 0) {
+            displayColumns = Object.keys(jsonData[0]);
+            // Asumimos que queremos mostrar todas las columnas
+            displayColumns.forEach(col => {
+              jsonKeyMapping[col] = col;
+            });
+          }
+          generateFilters();
+          const container = document.getElementById("table-container");
+          container.innerHTML = '<p class="text-center">Seleccione al menos un filtro para consultar la información.</p>';
+          container.classList.add("d-none");
+        })
+        .catch(error => {
+          document.getElementById("table-container").innerHTML = "<p>Error al cargar los datos.</p>";
+        });
+    }
+
+    // Renderiza la tabla y formatea las columnas de precio
+    function renderTable(data) {
+      const container = document.getElementById("table-container");
+      if (data.length === 0) {
+        container.innerHTML = '<p class="text-center">No se encontraron datos con los filtros seleccionados.</p>';
+        container.classList.remove("d-none");
+        return;
+      }
+
+      let table = '<table class="table table-bordered"><thead><tr>';
+      displayColumns.forEach(col => {
+        table += `<th style="text-align:center;">${col}</th>`;
+      });
+      table += '</tr></thead><tbody>';
+
+      data.forEach(item => {
+        table += '<tr>';
+        displayColumns.forEach(col => {
+          let cell = item[jsonKeyMapping[col]];
+          // Definir las columnas de precios a formatear:
+          const priceFields = ["Precio Meli", "3 cuotas", "6 cuotas", "9 cuotas", "12 cuotas", "Sell In con IVA"];
+          if (priceFields.includes(col)) {
+            cell = formatCurrency(cell);
+          }
+          table += `<td>${(cell !== undefined && cell !== null) ? cell : ""}</td>`;
+        });
+        table += '</tr>';
+      });
+
+      table += '</tbody></table>';
+      container.innerHTML = table;
+      container.classList.remove("d-none");
+    }
+
+    function filterData() {
+      const filtered = jsonData.filter(item => {
+        return filterColumns.every(({ id, key }) => {
+          const select = document.getElementById(id);
+          const val = select.value;
+          return !val || (item[key] && item[key].toString().toLowerCase() === val.toLowerCase());
+        });
+      });
+      renderTable(filtered);
+    }
+
+    document.getElementById("btnConsultar").addEventListener("click", filterData);
+    window.onload = loadJSONData;
+  </script>
+</body>
+</html>

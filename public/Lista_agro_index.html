@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Lista de Precios AGR</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="IMG/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="IMG/favicon.svg" />
+  <link rel="shortcut icon" href="IMG/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="IMG/apple-touch-icon.png" />
+  <link rel="manifest" href="IMG/site.webmanifest" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <a class="navbar-brand" href="index.html">
+      <img src="IMG/logo corven neumaticos.png" alt="Logo Corven" height="30" class="d-inline-block align-middle">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse"
+      data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon">☰</span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <!-- Se actualiza para que redirija a sublistas_pcr.html -->
+          <a class="nav-link" href="sublistas_pcr.html">Lista PCR</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="lista_agro_index.html">Lista AGR</a></li>
+        <li class="nav-item"><a class="nav-link" href="lista_tbr_index.html">Lista TBR</a></li>
+        <li class="nav-item"><a class="nav-link" href="lista_moto_index.html">Lista MTR</a></li>
+      </ul>
+    </div>
+  </nav>  
+
+  <!-- CONTENIDO -->
+  <div class="container mt-5 pt-5">
+    <h1 class="text-center mb-4">Consulta de Lista de Precios AGR</h1>
+    <form id="filterForm">
+      <div class="form-row">
+        <div class="form-group col-12 col-md-4">
+          <label for="filtroCodigoProd">Cod. Prod.</label>
+          <select class="form-control" id="filtroCodigoProd">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="form-group col-12 col-md-4">
+          <label for="filtroMedida">Medida</label>
+          <select class="form-control" id="filtroMedida">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="form-group col-12 col-md-4">
+          <label for="filtroMarca">Marca</label>
+          <select class="form-control" id="filtroMarca">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-12 col-md-4">
+          <label for="filtroCategoria">Categoria</label>
+          <select class="form-control" id="filtroCategoria">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="form-group col-12 col-md-4">
+          <label for="filtroSegmento">Segmento/ aplicación</label>
+          <select class="form-control" id="filtroSegmento">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- BLOQUE DE DESCUENTOS COPIADO DE PCR -->
+      <div class="form-row justify-content-center mb-3">
+        <label for="porcentajeInput" class="mr-2"><strong>Descuento adicional % :</strong></label>
+        <input type="number" id="porcentajeInput" class="form-control w-auto" placeholder="Ej: -10 o 10" />
+        <button type="button" class="btn btn-primary ml-2" id="btnAplicarPorcentaje">Aplicar</button>
+      </div>
+
+      <div class="form-row justify-content-center">
+        <button type="submit" class="btn btn-primary mx-2">Consultar</button>
+        <button type="button" class="btn btn-secondary mx-2" onclick="window.location.href='index.html'">Volver</button>
+      </div>
+    </form>
+    <div id="table-container" class="table-scroll d-none mt-4"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer-custom d-flex justify-content-between align-items-center px-4 py-3 mt-5">
+    <p class="mb-0 text-secondary">&copy; 2025 Corven Neumáticos. Todos los derechos reservados.</p>
+    <img src="IMG/logos_grupo-corven_para_fondo_blanco.png" alt="Logo Corven" class="footer-logo">
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script>
+    let jsonData = [];
+    // Ruta al JSON de AGR (lista de precios de Agro)
+    const jsonFiles = { AGRO: "Lista_de_Precio_AGRO.json" };
+    let selectedList = "AGRO";
+    let porcentajeDescuento = 0;
+
+    const jsonKeyMapping = {
+      "COD. PROD.": "COD. PROD.",
+      "LLANTA": "LLANTA",
+      "MEDIDA": "MEDIDA",
+      "MARCA": "MARCA",
+      "MODELO": "MODELO",
+      "CATEGORIA": "CATEGORIA",
+      "INDICE CARGA": "INDICE CARGA",
+      "ORIGEN*": "ORIGEN*",
+      "LÍNEA (A/C/LT)": "LÍNEA (A/C/LT)",
+      "PRECIO LISTA (Con IVA)": "PRECIO LISTA (Con IVA)",
+      "PRECIO CONTADO ": "PRECIO CONTADO ",
+      "PRECIO                     0-30-60": "PRECIO                     0-30-60",
+      "PRECIO                      0-30-60-90": "PRECIO                      0-30-60-90",
+      "SEGMENTO / APLICACIÓN": "SEGMENTO / APLICACIÓN",
+      "D/R": "D/R",
+      "DISPONIBILIDAD / PROMOCIONES ": "DISPONIBILIDAD / PROMOCIONES "
+    };
+
+    const displayColumns = [
+      "COD. PROD.",
+      "LLANTA",
+      "MEDIDA",
+      "MARCA",
+      "MODELO",
+      "CATEGORIA",
+      "INDICE CARGA",
+      "ORIGEN*",
+      "LÍNEA (A/C/LT)",
+      "PRECIO LISTA (Con IVA)",
+      "PRECIO CONTADO ",
+      "PRECIO                     0-30-60",
+      "PRECIO                      0-30-60-90",
+      "SEGMENTO / APLICACIÓN",
+      "D/R",
+      "DISPONIBILIDAD / PROMOCIONES "
+    ];
+
+    const filterColumns = [
+      { id: "filtroCodigoProd", key: "COD. PROD." },
+      { id: "filtroMedida", key: "MEDIDA" },
+      { id: "filtroMarca", key: "MARCA" },
+      { id: "filtroCategoria", key: "CATEGORIA" },
+      { id: "filtroSegmento", key: "SEGMENTO / APLICACIÓN" }
+    ];
+
+    function formatCurrency(value) {
+      const number = parseFloat(value);
+      return isNaN(number) ? value : "$" + Math.round(number).toLocaleString("es-ES");
+    }
+
+    function loadJSONData() {
+      fetch(jsonFiles[selectedList])
+        .then(response => response.json())
+        .then(data => {
+          jsonData = data; // Se asume que el JSON ya trae las claves correctas
+          populateFilters();
+          document.getElementById("table-container").innerHTML =
+            '<p class="text-center">Seleccione al menos un filtro para consultar la información.</p>';
+          document.getElementById("table-container").classList.add("d-none");
+        })
+        .catch(error => {
+          document.getElementById("table-container").innerHTML = "<p>Error al cargar los datos.</p>";
+        });
+    }
+
+    function populateFilters() {
+      filterColumns.forEach(({ id, key }) => {
+        const select = document.getElementById(id);
+        select.innerHTML = '<option value="">Todos</option>';
+        const values = new Set();
+
+        jsonData.forEach(item => {
+          if (item[key]) values.add(String(item[key]).trim());
+        });
+
+        [...values].sort((a, b) => a.localeCompare(b)).forEach(val => {
+          const option = document.createElement("option");
+          option.value = val;
+          option.textContent = val;
+          select.appendChild(option);
+        });
+      });
+
+      $("select").select2({ placeholder: "Seleccione...", allowClear: true });
+      $("#filtroCodigoProd").select2({ minimumInputLength: 1, placeholder: "Escribe el SKU..." });
+    }
+
+    function renderTable(data) {
+      const container = document.getElementById("table-container");
+
+      if (data.length === 0) {
+        container.innerHTML = '<p class="text-center">No se encontraron datos con los filtros seleccionados.</p>';
+        container.classList.remove("d-none");
+        return;
+      }
+
+      let table = '<table class="table table-striped"><thead><tr>';
+      displayColumns.forEach(col => {
+        table += `<th style="text-align:center;">${col}</th>`;
+      });
+      table += "</tr></thead><tbody>";
+
+      data.forEach(item => {
+        table += "<tr>";
+        displayColumns.forEach(col => {
+          let cell = item[jsonKeyMapping[col]];
+
+          // Para "PRECIO LISTA (Con IVA)" se muestra sin cambios
+          if (col === "PRECIO LISTA (Con IVA)") {
+            cell = formatCurrency(cell);
+          }
+          // Si es alguna de las columnas de precios a modificar, se aplica el descuento
+          else if (col === "PRECIO CONTADO " || 
+                   col === "PRECIO                     0-30-60" || 
+                   col === "PRECIO                      0-30-60-90") {
+            const original = parseFloat(item[jsonKeyMapping[col]]);
+            cell = !isNaN(original) ? formatCurrency(original * (1 + porcentajeDescuento / 100)) : "";
+          }
+          // De lo contrario, se muestra el valor tal cual
+          else {
+            cell = cell !== undefined ? cell : "";
+          }
+
+          table += `<td>${cell}</td>`;
+        });
+        table += "</tr>";
+      });
+
+      table += "</tbody></table>";
+      container.innerHTML = table;
+      container.classList.remove("d-none");
+    }
+
+    function filterData() {
+      const filtered = jsonData.filter(item => {
+        return filterColumns.every(({ id, key }) => {
+          const val = document.getElementById(id).value;
+          return !val || String(item[key]).toLowerCase() === val.toLowerCase();
+        });
+      });
+      renderTable(filtered);
+    }
+
+    document.getElementById("filterForm").addEventListener("submit", e => {
+      e.preventDefault();
+      filterData();
+    });
+
+    document.getElementById("btnAplicarPorcentaje").addEventListener("click", () => {
+      const input = document.getElementById("porcentajeInput").value;
+      porcentajeDescuento = parseFloat(input) || 0;
+      filterData();
+    });
+
+    window.onload = loadJSONData;
+  </script>
+</body>
+</html>

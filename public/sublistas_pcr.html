@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sublistas PCR</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <script>
+    if (!localStorage.getItem("token")) {
+      window.location.href = "login.html";
+    }
+  </script>
+</head>
+<body>
+  <!-- Puedes incluir el mismo navbar de index.html si lo deseas -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <a class="navbar-brand" href="index.html">
+      <img src="IMG/logo corven neumaticos.png" alt="Logo Corven" height="30">
+    </a>
+  </nav>
+  
+  <div class="container mt-5 pt-5">
+    <h1 class="text-center mb-4">Sublistas PCR</h1>
+    <!-- Desplegable para seleccionar canal -->
+    <div class="form-group">
+      <label for="canalSelect">Seleccione Canal</label>
+      <select id="canalSelect" class="form-control">
+        <option value="">Seleccione...</option>
+        <!-- La opción Retail, permitida para roles administrador, gerente y comercial_retail -->
+        <option value="lista_pcr_retail.html" data-permissions="administrador,gerente,comercial_retail">Retail</option>
+        <!-- Otras opciones para otros roles (estas se eliminarán si el usuario es comercial_retail) -->
+        <option value="lista_pcr_empleados.html" data-permissions="administrador,gerente,comercial_pcr">Empleados y Referidos</option>
+        <option value="lista_pcr_toyota.html" data-permissions="administrador,gerente,comercial_pcr">Toyota</option>
+        <option value="lista_ecommerce_index.html" data-permissions="administrador,gerente,comercial_ecommerce">E‑Commerce</option>
+        <option value="lista_pcr_autopartes.html" data-permissions="administrador,gerente,comercial_autopartes">Autopartes</option>
+        <option value="lista_pcr_distribuidor.html" data-permissions="administrador,gerente,comercial_pcr">Distribuidor</option>
+      </select>
+    </div>
+    <button id="goButton" class="btn btn-primary">Ir al canal</button>
+  </div>
+  
+  <footer class="footer-custom d-flex justify-content-between align-items-center px-4 py-3 mt-5">
+    <p class="mb-0 text-secondary">&copy; 2025 Corven Neumáticos. Todos los derechos reservados.</p>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    // Al hacer clic, redirige a la URL seleccionada
+    document.getElementById("goButton").addEventListener("click", function() {
+      const select = document.getElementById("canalSelect");
+      const url = select.value;
+      if (url) {
+        window.location.href = url;
+      } else {
+        alert("Por favor, seleccione un canal.");
+      }
+    });
+
+    // Filtra las opciones del desplegable según el rol del usuario
+    document.addEventListener("DOMContentLoaded", function() {
+      // Aseguramos que window.currentUser esté definido (lo define accesos.js)
+      if (!window.currentUser) return;
+      const select = document.getElementById("canalSelect");
+      const options = select.querySelectorAll("option[data-permissions]");
+      options.forEach(option => {
+        const allowedRoles = option.getAttribute("data-permissions")
+          .split(",")
+          .map(r => r.trim().toLowerCase());
+        if (!allowedRoles.includes(window.currentUser.role.toLowerCase())) {
+          option.remove();
+        }
+      });
+    });
+  </script>
+  <script src="accesos.js"></script>
+</body>
+</html>

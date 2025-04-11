@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seleccione la Lista de Precios</title>
+  
+  <!-- Bootstrap y estilos -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  
+  <!-- Redirige a login si no hay token -->
+  <script>
+    if (!localStorage.getItem("token")) {
+      window.location.href = "login.html";
+    }
+  </script>
+</head>
+<body>
+  <!-- NAVBAR: Se muestran todas las opciones visualmente -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <a class="navbar-brand" href="index.html">
+      <img src="IMG/logo corven neumaticos.png" alt="Logo Corven" height="30">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+      <span class="navbar-toggler-icon">☰</span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <!-- Lista PCR: accesible para administrador, gerente, comercial_pcr y comercial_retail -->
+        <li class="nav-item" data-permissions="administrador,gerente,comercial_pcr,comercial_retail">
+          <a class="nav-link" href="sublistas_pcr.html">Lista PCR</a>
+        </li>
+        <!-- Lista AGR: accesible solo para administrador, gerente y comercial_agro -->
+        <li class="nav-item" data-permissions="administrador,gerente,comercial_agro">
+          <a class="nav-link" href="lista_agro_index.html">Lista AGR</a>
+        </li>
+        <!-- Lista TBR: accesible solo para administrador, gerente y comercial_tbr -->
+        <li class="nav-item" data-permissions="administrador,gerente,comercial_tbr">
+          <a class="nav-link" href="lista_tbr_index.html">Lista TBR</a>
+        </li>
+        <!-- Lista MTR: accesible solo para administrador, gerente y comercial_moto -->
+        <li class="nav-item" data-permissions="administrador,gerente,comercial_moto">
+          <a class="nav-link" href="lista_moto_index.html">Lista MTR</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO COMPLETO: CARROUSEL, NEWSLETTER, etc. (sin restricciones) -->
+  <div class="container mt-5 pt-5">
+    <!-- Carrousel -->
+    <div id="flyerCarousel" class="carousel slide" data-ride="carousel">
+      <ol class="carousel-indicators">
+        <li data-target="#flyerCarousel" data-slide-to="0" class="active"></li>
+        <li data-target="#flyerCarousel" data-slide-to="1"></li>
+        <li data-target="#flyerCarousel" data-slide-to="2"></li>
+      </ol>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="IMG/banner 1.png" class="d-block w-100" alt="Flyer 1">
+        </div>
+        <div class="carousel-item">
+          <img src="IMG/banner 2.jpg" class="d-block w-100" alt="Flyer 2">
+        </div>
+        <div class="carousel-item">
+          <img src="IMG/banner 3.jpg" class="d-block w-100" alt="Flyer 3">
+        </div>
+      </div>
+      <a class="carousel-control-prev" href="#flyerCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      </a>
+      <a class="carousel-control-next" href="#flyerCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <!-- Newsletter -->
+    <section class="newsletter-section text-center py-5 px-3">
+      <h2 class="newsletter-title">Entérate de nuestras novedades</h2>
+      <p class="newsletter-desc">Suscríbete a nuestro boletín y recibe promociones y lanzamientos directamente en tu correo.</p>
+      <form class="newsletter-form d-flex justify-content-center flex-wrap mt-4">
+        <input type="email" class="form-control newsletter-input mb-2 mb-md-0" placeholder="Tu email..." required>
+        <button type="submit" class="btn btn-primary ml-md-2">Suscribirme</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer-custom d-flex justify-content-between align-items-center px-4 py-3 mt-5">
+    <p class="mb-0 text-secondary">&copy; 2025 Corven Neumáticos. Todos los derechos reservados.</p>
+    <img src="IMG/logos_grupo-corven_para_fondo_blanco.png" alt="Logo Corven" class="footer-logo">
+  </footer>
+
+  <!-- Scripts JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="accesos.js"></script>
+</body>
+</html>
